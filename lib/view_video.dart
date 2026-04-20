@@ -1,7 +1,5 @@
 import 'dart:io';
-import 'package:es_viewer/utils/constant.dart';
 import 'package:flutter/material.dart';
-import 'package:photo_view/photo_view.dart';
 import 'package:video_player/video_player.dart';
 class ViewVideo extends StatefulWidget {
   final String? path; // Path to the video file

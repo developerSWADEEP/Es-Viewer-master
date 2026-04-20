@@ -21,20 +21,18 @@ class _SplashState extends State<Splash> {
   @override
   void initState() {
     super.initState();
-    Timer(
-        const Duration(seconds: 3),
-        () => {
-              Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (context) => Home()
-                      ))
-            });
+    Timer(const Duration(seconds: 3), () {
+      if (!mounted) return;
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const Home()),
+      );
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
-    final height = MediaQuery.of(context).size.height;
     return Scaffold(
         body: Stack(children: [
       Column(

@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'package:es_viewer/utils/constant.dart';
 import 'package:flutter/material.dart';
 import 'package:photo_view/photo_view.dart';
 class ViewImg extends StatefulWidget {

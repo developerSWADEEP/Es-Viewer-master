@@ -124,7 +124,7 @@ class _CSVViewerState extends State<CSVViewer> {
       return [];
     }
     String csvString = await File(path).readAsString();
-    final csvConverter = csv.CsvToListConverter(eol: '\n', fieldDelimiter: ',');
-    return csvConverter.convert(csvString);
+    final parser = csv.Csv(fieldDelimiter: ',');
+    return parser.decode(csvString);
   }
 }

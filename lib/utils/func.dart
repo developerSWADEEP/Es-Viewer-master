@@ -14,7 +14,7 @@ import '../view_video.dart';
 class func {
   static selectPdf(BuildContext context) async {
     String resultPath = 'No file selected';
-    FilePickerResult? result = await FilePicker.platform.pickFiles(
+    FilePickerResult? result = await FilePicker.pickFiles(
       type: FileType.custom,
       allowedExtensions: [
         'pdf',

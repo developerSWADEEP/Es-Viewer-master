@@ -1,14 +1,16 @@
 import 'package:es_viewer/splash.dart';
 import 'package:flutter/material.dart';
-import 'package:upgrader/upgrader.dart';
-void main() async {
-  runApp(MyApp());
+void main() {
+  runApp(const MyApp());
 }
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
-    return  const MaterialApp(
-      home: Splash(), // Display the splash screen initially
+    return const MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: const Splash(),
     );
   }
 }

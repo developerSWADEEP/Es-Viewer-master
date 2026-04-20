@@ -21,7 +21,7 @@ class ExcelViewer extends StatefulWidget {
 
 class _ExcelViewerState extends State<ExcelViewer> {
   late String excelFilePath;
-  late Excel excel;
+  Excel? excel;
 
   @override
   void initState() {
@@ -40,11 +40,9 @@ class _ExcelViewerState extends State<ExcelViewer> {
 
     var file = File(excelFilePath);
     var bytes = file.readAsBytesSync();
-    var excelData = await Excel.decodeBytes(bytes);
+    var excelData = Excel.decodeBytes(bytes);
 
-    if (excelData.tables.isNotEmpty) {
-      excel = excelData;
-    }
+    if (excelData.tables.isNotEmpty) excel = excelData;
   }
 
   @override
@@ -54,7 +52,7 @@ class _ExcelViewerState extends State<ExcelViewer> {
       return Center(child: CircularProgressIndicator());
     } else {
       // Extract data from Excel and display it in a DataTable
-      var table = excel.tables[excel.tables.keys.first];
+      var table = excel!.tables[excel!.tables.keys.first];
 
       return Scaffold(
         appBar: AppBar(
@@ -88,7 +86,10 @@ class _ExcelViewerState extends State<ExcelViewer> {
   }
 
   List<DataColumn> _buildColumns(Sheet sheet) {
-    var headers = sheet.row(0).map((cell) => DataColumn(label: Text(cell!.value))).toList();
+    var headers = sheet
+        .row(0)
+        .map((cell) => DataColumn(label: Text(cell?.value.toString() ?? "")))
+        .toList();
     return headers;
   }
 
@@ -96,7 +97,8 @@ class _ExcelViewerState extends State<ExcelViewer> {
     var rows = <DataRow>[];
     for (var i = 1; i < sheet.maxRows; i++) {
       var row = sheet.row(i);
-      var cells = row.map((cell) => DataCell(Text(cell!.value))).toList();
+      var cells =
+          row.map((cell) => DataCell(Text(cell?.value.toString() ?? ""))).toList();
       rows.add(DataRow(cells: cells));
     }
     return rows;

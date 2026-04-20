@@ -1,38 +1,20 @@
 import 'package:es_viewer/utils/constant.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import 'package:es_viewer/utils/func.dart';
-import 'package:es_viewer/uri_to_file.dart';
 import 'package:upgrader/upgrader.dart';
 
 class Home extends StatefulWidget {
+  const Home({super.key});
+
   @override
   _HomeState createState() => _HomeState();
 }
 
 class _HomeState extends State<Home> with TickerProviderStateMixin {
-
-
   @override
   void initState() {
     super.initState();
-    //This method will call when user is opening file from share method /when app is closed
-    ReceiveSharingIntent.getInitialMedia().then((List<SharedMediaFile> files) {
-      if (files != null) {
-        print(files.map((f) => f.path).join(","));
-        func.openFile(context, files.map((f) => f.path).join(","));
-      }
-    });
-
-    //this method will when user select file from open with method /when app is closed
-    ReceiveSharingIntent.getInitialText().then((String? value) {
-      if (value != null) {
-        toFile(value).then((value) => {
-          func.openFile(context, value.path.toString()),
-        });
-      }
-    });
   }
 
   Widget fileCircle() {
@@ -111,10 +93,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: Constant.title,
-      debugShowCheckedModeBanner: false,
-      home: WillPopScope(
+    return WillPopScope(
         onWillPop: () async {
           func.showExitConfirmationDialog(context);
           return false;
@@ -165,7 +144,6 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
             ),
           ),
         ),
-      ),
-    );
+      );
   }
 }
