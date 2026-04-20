@@ -21,8 +21,20 @@ class _SplashState extends State<Splash> {
   @override
   void initState() {
     super.initState();
-    Timer(const Duration(seconds: 3), () {
+    Timer(const Duration(seconds: 2), () async {
       if (!mounted) return;
+      final initialFilePath = await func.consumeInitialSharedFilePath();
+      if (!mounted) return;
+      if (initialFilePath != null) {
+        final viewer = func.buildViewerForPath(initialFilePath);
+        if (viewer != null) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => viewer),
+          );
+          return;
+        }
+      }
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => const Home()),

@@ -1,10 +1,13 @@
 import 'dart:io';
 
+import 'package:es_viewer/view_docx.dart';
+import 'package:es_viewer/view_excel.dart';
 import 'package:es_viewer/utils/s_colors.dart';
 import 'package:es_viewer/utils/view_text.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:flutter/services.dart';
 import 'package:path/path.dart' as path;
 import '../view_csv.dart';
 import '../view_img.dart';
@@ -12,6 +15,8 @@ import '../view_pdf.dart';
 import '../view_video.dart';
 
 class func {
+  static const MethodChannel _openFileChannel = MethodChannel('es_viewer/open_file');
+
   static selectPdf(BuildContext context) async {
     String resultPath = 'No file selected';
     FilePickerResult? result = await FilePicker.pickFiles(
@@ -20,6 +25,8 @@ class func {
         'pdf',
         'doc',
         'docx',
+        'xls',
+        'xlsx',
         'csv',
         'txt',
         'java',
@@ -46,79 +53,12 @@ class func {
     );
     if (result != null) {
       String filePath = result.files.single.path!;
-      print(filePath);
-      print(result.files.single.extension);
       if (filePath.isNotEmpty) {
-        switch (result.files.single.extension) {
-          case "pdf":
-            goTo(context, ViewPdf(path: filePath));
-            break;
-          case "csv":
-            goTo(context, CSVViewer(path: filePath));
-            break;
-          case "txt":
-            goTo(context, ViewTextFiles(path: filePath));
-            break;
-          case "java":
-            goTo(context, ViewTextFiles(path: filePath));
-            break;
-          case "dart":
-            goTo(context, ViewTextFiles(path: filePath));
-            break;
-          case "py":
-            goTo(context, ViewTextFiles(path: filePath));
-            break;
-          case "html":
-            goTo(context, ViewTextFiles(path: filePath));
-            break;
-          case "css":
-            goTo(context, ViewTextFiles(path: filePath));
-            break;
-          case "js":
-            goTo(context, ViewTextFiles(path: filePath));
-            break;
-          case "xml":
-            goTo(context, ViewTextFiles(path: filePath));
-            break;
-          case "jpg":
-            goTo(context, ViewImg(path: filePath));
-            break;
-          case "png":
-            goTo(context, ViewImg(path: filePath));
-            break;
-          case "webp":
-            goTo(context, ViewImg(path: filePath));
-            break;
-          case "mp4":
-            goTo(context, ViewVideo(path: filePath));
-            break;
-          case "avi":
-            goTo(context, ViewVideo(path: filePath));
-            break;
-          case "mkv":
-            goTo(context, ViewVideo(path: filePath));
-            break;
-          case "mpg":
-            goTo(context, ViewVideo(path: filePath));
-            break;
-          case "3gp":
-            goTo(context, ViewVideo(path: filePath));
-            break;
-          case "webm":
-            goTo(context, ViewVideo(path: filePath));
-            break;
-          case "flv":
-            goTo(context, ViewVideo(path: filePath));
-            break;
-          case "wmv":
-            goTo(context, ViewVideo(path: filePath));
-            break;
-          case "mov":
-            goTo(context, ViewVideo(path: filePath));
-            break;
-          // Add more cases as needed
-          default:
-          // Code to execute if none of the cases match
+        final viewer = buildViewerForPath(filePath);
+        if (viewer != null) {
+          goTo(context, viewer);
+        } else {
+          showToast("This file format is not supported yet");
         }
       }
     } else {
@@ -128,77 +68,80 @@ class func {
   }
 
   static openFile(context, filePath) {
-    String fileExtension = path.extension(filePath);
+    final viewer = buildViewerForPath(filePath);
+    if (viewer != null) {
+      goTo(context, viewer);
+    } else {
+      showToast("This file format is not supported yet");
+    }
+  }
+
+  static Widget? buildViewerForPath(String filePath) {
+    final fileExtension = path.extension(filePath).toLowerCase();
     switch (fileExtension) {
       case ".pdf":
-        goTo(context, ViewPdf(path: filePath));
-        break;
+        return ViewPdf(path: filePath);
       case ".csv":
-        goTo(context, CSVViewer(path: filePath));
-        break;
+        return CSVViewer(path: filePath);
+      case ".xls":
+      case ".xlsx":
+        return ExcelViewer(path: filePath);
+      case ".docx":
+        return ViewDocx(path: filePath);
       case ".txt":
-        goTo(context, ViewTextFiles(path: filePath));
-        break;
+        return ViewTextFiles(path: filePath);
       case ".java":
-        goTo(context, ViewTextFiles(path: filePath));
-        break;
+        return ViewTextFiles(path: filePath);
       case ".dart":
-        goTo(context, ViewTextFiles(path: filePath));
-        break;
+        return ViewTextFiles(path: filePath);
       case ".py":
-        goTo(context, ViewTextFiles(path: filePath));
-        break;
+        return ViewTextFiles(path: filePath);
       case ".html":
-        goTo(context, ViewTextFiles(path: filePath));
-        break;
+        return ViewTextFiles(path: filePath);
       case ".css":
-        goTo(context, ViewTextFiles(path: filePath));
-        break;
+        return ViewTextFiles(path: filePath);
       case ".js":
-        goTo(context, ViewTextFiles(path: filePath));
-        break;
+        return ViewTextFiles(path: filePath);
       case ".xml":
-        goTo(context, ViewTextFiles(path: filePath));
-        break;
+        return ViewTextFiles(path: filePath);
       case ".jpg":
-        goTo(context, ViewImg(path: filePath));
-        break;
+        return ViewImg(path: filePath);
       case ".png":
-        goTo(context, ViewImg(path: filePath));
-        break;
+        return ViewImg(path: filePath);
       case ".webp":
-        goTo(context, ViewImg(path: filePath));
-        break;
+        return ViewImg(path: filePath);
       case ".mp4":
-        goTo(context, ViewVideo(path: filePath));
-        break;
+        return ViewVideo(path: filePath);
       case ".avi":
-        goTo(context, ViewVideo(path: filePath));
-        break;
+        return ViewVideo(path: filePath);
       case ".mkv":
-        goTo(context, ViewVideo(path: filePath));
-        break;
+        return ViewVideo(path: filePath);
       case ".mpg":
-        goTo(context, ViewVideo(path: filePath));
-        break;
+        return ViewVideo(path: filePath);
       case ".3gp":
-        goTo(context, ViewVideo(path: filePath));
-        break;
+        return ViewVideo(path: filePath);
       case ".webm":
-        goTo(context, ViewVideo(path: filePath));
-        break;
+        return ViewVideo(path: filePath);
       case ".flv":
-        goTo(context, ViewVideo(path: filePath));
-        break;
+        return ViewVideo(path: filePath);
       case ".wmv":
-        goTo(context, ViewVideo(path: filePath));
-        break;
+        return ViewVideo(path: filePath);
       case ".mov":
-        goTo(context, ViewVideo(path: filePath));
-        break;
-      // Add more cases as needed
+        return ViewVideo(path: filePath);
       default:
-      // Code to execute if none of the cases match
+        return null;
+    }
+  }
+
+  static Future<String?> consumeInitialSharedFilePath() async {
+    try {
+      final filePath = await _openFileChannel.invokeMethod<String>('consumeInitialFilePath');
+      if (filePath == null || filePath.isEmpty) {
+        return null;
+      }
+      return filePath;
+    } catch (_) {
+      return null;
     }
   }
 

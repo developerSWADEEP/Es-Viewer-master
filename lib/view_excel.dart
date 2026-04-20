@@ -1,65 +1,58 @@
-import 'package:es_viewer/utils/constant.dart';
-import 'package:flutter/material.dart';
-import 'package:excel/excel.dart';
 import 'dart:io';
-
-
-
-class ExcelViewerApp extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      home: ExcelViewer(),
-    );
-  }
-}
+import 'package:es_viewer/utils/constant.dart';
+import 'package:excel/excel.dart';
+import 'package:flutter/material.dart';
 
 class ExcelViewer extends StatefulWidget {
+  final String path;
+
+  const ExcelViewer({super.key, required this.path});
+
   @override
-  _ExcelViewerState createState() => _ExcelViewerState();
+  State<ExcelViewer> createState() => _ExcelViewerState();
 }
 
 class _ExcelViewerState extends State<ExcelViewer> {
-  late String excelFilePath;
   Excel? excel;
+  String? errorMessage;
 
   @override
   void initState() {
     super.initState();
-    loadExcelFile().then((_) {
-      setState(() {});
-    });
+    loadExcelFile();
   }
 
   Future<void> loadExcelFile() async {
-    // Replace 'assets/sample.xlsx' with the path to your Excel file
-    excelFilePath = 'assets/ex.xls';
-
-    // If you want to load an Excel file from external storage, you can use file_picker or other methods
-    // excelFilePath = await FilePicker.platform.pickFiles(type: FileType.custom, allowedExtensions: ['xlsx']);
-
-    var file = File(excelFilePath);
-    var bytes = file.readAsBytesSync();
-    var excelData = Excel.decodeBytes(bytes);
-
-    if (excelData.tables.isNotEmpty) excel = excelData;
+    try {
+      final file = File(widget.path);
+      final bytes = await file.readAsBytes();
+      final excelData = Excel.decodeBytes(bytes);
+      if (!mounted) return;
+      setState(() {
+        excel = excelData;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        errorMessage = 'Error opening spreadsheet: $e';
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    if (excel == null) {
-      // Show a loading indicator while Excel data is being loaded
-      return Center(child: CircularProgressIndicator());
-    } else {
-      // Extract data from Excel and display it in a DataTable
-      var table = excel!.tables[excel!.tables.keys.first];
+    final firstSheetName = excel?.tables.keys.isNotEmpty == true
+        ? excel!.tables.keys.first
+        : null;
+    final table = firstSheetName != null ? excel!.tables[firstSheetName] : null;
 
+    if (excel == null) {
       return Scaffold(
         appBar: AppBar(
           title: Text(Constant.title),
-          backgroundColor: Colors.transparent, // Set the background color to transparent
+          backgroundColor: Colors.transparent,
           flexibleSpace: Container(
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
@@ -71,16 +64,45 @@ class _ExcelViewerState extends State<ExcelViewer> {
             ),
           ),
         ),
-        body: SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: SingleChildScrollView(
-            scrollDirection: Axis.vertical,
-            child: DataTable(
-              columns: _buildColumns(table!),
-              rows: _buildRows(table),
+        body: Center(
+          child: errorMessage == null
+              ? const CircularProgressIndicator()
+              : Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Text(errorMessage!),
+                ),
+        ),
+      );
+    } else {
+      return Scaffold(
+        appBar: AppBar(
+          title: Text(Constant.title),
+          backgroundColor: Colors.transparent,
+          flexibleSpace: Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Color(0xff33ccff),
+                  Color(0xffff99cc),
+                ],
+              ),
             ),
           ),
         ),
+        body: table == null
+            ? const Center(child: Text('No data found in this spreadsheet'))
+            : SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.vertical,
+                  child: DataTable(
+                    columns: _buildColumns(table),
+                    rows: _buildRows(table),
+                  ),
+                ),
+          ),
       );
     }
   }
